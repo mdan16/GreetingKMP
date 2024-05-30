@@ -5,7 +5,7 @@ struct ContentView: View {
     @ObservedObject private(set) var viewModel: ViewModel
 
     var body: some View {
-        ListView(phrases: viewModel.greetings)
+        ListView(phrases: viewModel.items)
             .onAppear {
                 self.viewModel.startObserving()
             }
@@ -21,12 +21,12 @@ struct ContentView_Previews: PreviewProvider {
 extension ContentView {
     @MainActor
     class ViewModel: ObservableObject {
-        @Published var greetings: Array<String> = []
+        @Published var items: Array<QiitaItem> = []
 
         func startObserving() {
             Task {
-                for await phrase in Greeting().greet() {
-                    self.greetings.append(phrase)
+                for await items in QiitaComponent().getItems() {
+                    self.items = items
                 }
             }
         }
@@ -34,11 +34,11 @@ extension ContentView {
 }
 
 struct ListView: View {
-    let phrases: Array<String>
+    let phrases: Array<QiitaItem>
 
     var body: some View {
         List(phrases, id: \.self) {
-            Text($0)
+            Text($0.title)
         }
     }
 }
